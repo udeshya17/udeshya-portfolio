@@ -1,0 +1,218 @@
+@import "tailwindcss";
+
+@property --accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #b69cff;
+}
+@property --accent-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #3fe0ff;
+}
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+}
+
+@theme {
+  --color-void: #04040a;
+  --color-ink: #0b0b14;
+  --color-panel: #10101c;
+  --color-line: rgb(255 255 255 / 0.09);
+  --color-fog: #8d8fa6;
+  --color-bone: #eeeef5;
+  --color-acid: #d4ff3f;
+  --color-violet: #8b6cff;
+  --color-cyan: #3fe0ff;
+  --color-ember: #ff7a3d;
+  --color-rose: #ff5c8a;
+
+  --font-display: var(--font-syne), "Syne", system-ui, sans-serif;
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-serif: var(--font-instrument), Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --animate-spin-slow: spin 22s linear infinite;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+    50% { box-shadow: 0 0 0 7px transparent; }
+  }
+}
+
+:root {
+  color-scheme: dark;
+  --accent: #b69cff;
+  --accent-2: #3fe0ff;
+  transition: --accent 1.4s ease, --accent-2 1.4s ease;
+}
+
+html {
+  background: var(--color-void);
+  color: var(--color-bone);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+body {
+  background: var(--color-void);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+::selection { background: var(--accent); color: #000; }
+
+/* Hide native cursor only when our custom cursor is active (fine pointers) */
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor, html.has-cursor * { cursor: none !important; }
+}
+
+/* Film grain overlay */
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 8s steps(10) infinite;
+}
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  30% { transform: translate(3%, -15%); }
+  50% { transform: translate(12%, 9%); }
+  70% { transform: translate(9%, 4%); }
+  90% { transform: translate(-1%, 7%); }
+}
+
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(238 238 245 / 0.35);
+}
+
+.text-gradient {
+  background: linear-gradient(100deg, var(--color-bone) 5%, var(--accent) 40%, var(--accent-2) 70%, var(--color-bone) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 8s ease-in-out infinite alternate;
+}
+@keyframes shimmer { to { background-position: 100% 0; } }
+
+.glass {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0.02));
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+.hairline { border-color: var(--color-line); }
+
+/* Readable text over the 3D scene */
+.scrim {
+  background: radial-gradient(ellipse at center, rgb(4 4 10 / 0.72) 0%, rgb(4 4 10 / 0.35) 55%, transparent 75%);
+}
+
+.mask-fade-x {
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- hero ---------- */
+.aurora-blob { animation: aurora 18s ease-in-out infinite alternate; transition: background-color 1.4s ease; }
+@keyframes aurora {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(8vw, 6vh, 0) scale(1.15); }
+  100% { transform: translate3d(-6vw, -4vh, 0) scale(0.9); }
+}
+
+.marquee-track { animation: marquee 45s linear infinite; }
+.marquee-track:hover { animation-play-state: paused; }
+@keyframes marquee { to { transform: translate3d(-50%, 0, 0); } }
+
+.hero-char {
+  display: inline-block;
+  transition: translate 0.45s cubic-bezier(0.16, 1, 0.3, 1), color 0.45s ease, text-shadow 0.45s ease;
+}
+.hero-char.lit {
+  translate: 0 -7%;
+  color: var(--accent);
+  text-shadow: 0 0 40px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+/* keep one continuous gradient across split characters */
+.text-gradient .hero-char {
+  background-image: linear-gradient(100deg, var(--color-bone) 5%, var(--accent) 40%, var(--accent-2) 70%, var(--color-bone) 100%);
+  background-attachment: fixed;
+  background-size: 100vw 100vh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-gradient .hero-char.lit { color: transparent; filter: drop-shadow(0 0 24px var(--accent)); }
+
+/* ---------- website preview frames ---------- */
+@property --p {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+.browser-viewport { container-type: size; }
+.browser-shot {
+  /* slide the full-page screenshot up by (image height - viewport height) * --p */
+  translate: 0 calc(var(--p, 0) * (-100% + 100cqh));
+  will-change: translate;
+}
+.browser-hover { transition: --p 7s cubic-bezier(0.45, 0, 0.55, 1); }
+.group\/frame:hover .browser-hover,
+.group:hover .browser-hover { --p: 1; transition-duration: 7s; }
+.browser-hover { transition-duration: 1.2s; }
+
+/* ---------- readability over the 3D scene ---------- */
+main :is(h1, h2, h3, p, li, blockquote, figcaption, label) {
+  text-shadow: 0 1px 2px rgb(4 4 10 / 0.35), 0 2px 24px rgb(4 4 10 / 0.55);
+}
+main :is(.text-gradient, .text-gradient *, .text-outline, button, a.bg-accent, .bg-accent *) {
+  text-shadow: none;
+}
+.numeral {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 22%, rgb(255 255 255 / 0.05));
+  transition: -webkit-text-stroke-color 1.4s ease;
+}
+
+.tl-dot { background: #2a2a3a; transition: background-color .5s, box-shadow .5s; }
+.tl-dot.is-on { background: var(--accent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 15%, transparent), 0 0 30px var(--accent); }
+
+/* atmospheric band that lets the 3D scene recede behind long-form content */
+.veil::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, rgb(4 4 10 / 0.72) 14%, rgb(4 4 10 / 0.72) 86%, transparent 100%);
+}
