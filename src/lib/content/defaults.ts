@@ -567,7 +567,7 @@ export const defaultContent: SiteContent = {
   ],
   statsConfig: {
     githubUsername: "udeshya17",
-    leetcodeUsername: "udeshya17",
+    leetcodeUsername: "udeshya172002",
     showGithub: true,
     showLeetcode: true,
   },

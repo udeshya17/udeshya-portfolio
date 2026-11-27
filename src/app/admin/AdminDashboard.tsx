@@ -453,7 +453,7 @@ function ResumePanel({ content, onSaved, toast }: { content: SiteContent; onSave
         className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-14 text-center transition-colors ${drag ? "border-acid bg-acid/5" : "border-line hover:border-fog"}`}
       >
         <p className="font-display text-xl font-bold">{busy ? "Uploading…" : "Drop a new PDF here"}</p>
-        <p className="mt-1 text-sm text-fog">or click to browse · max 10 MB · replaces the live résumé instantly</p>
+        <p className="mt-1 text-sm text-fog">or click to browse · max 4 MB · replaces the live résumé instantly</p>
         <input
           ref={ref}
           type="file"
@@ -773,6 +773,14 @@ export default function AdminDashboard({ initial, storage, initialMessages }: { 
         </div>
       </header>
 
+      {storage === "temporary" && (
+        <div className="mx-auto mt-6 max-w-7xl px-5">
+          <p className="rounded-2xl border border-rose/40 bg-rose/10 px-5 py-4 text-sm">
+            ⚠ No database connected. Edits and uploads are temporary on Vercel and will disappear. Add <code className="text-acid">MONGODB_URI</code> in
+            Vercel → Settings → Environment Variables, then redeploy.
+          </p>
+        </div>
+      )}
       <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 md:grid-cols-[220px_1fr]">
         <nav className="no-scrollbar flex gap-1 overflow-x-auto md:sticky md:top-24 md:flex-col md:self-start">
           {TABS.map((t) => (

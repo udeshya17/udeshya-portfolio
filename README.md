@@ -84,9 +84,7 @@ The bundled résumé lives at `assets/resume.pdf` and is served until you upload
 
 ## Deploy
 
-**Vercel:** import the repo, set `ADMIN_PASSWORD`, `SESSION_SECRET` and `MONGODB_URI` (a free MongoDB Atlas cluster works), then deploy.
-
-**VPS / Docker:** `npm run build && npm start`. Keep `./data` on a persistent volume.
+Free on **Vercel + MongoDB Atlas**. Step-by-step guide: **[DEPLOY.md](./DEPLOY.md)**.
 
 ## Where things live
 

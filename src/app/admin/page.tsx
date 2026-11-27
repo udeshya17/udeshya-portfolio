@@ -7,6 +7,9 @@ import { storageKind, store } from "@/lib/content/store";
 import AdminDashboard from "./AdminDashboard";
 import LoginForm from "./LoginForm";
 
+// server actions on this page (uploads, preview refresh) may need extra time
+export const maxDuration = 60;
+
 export const metadata: Metadata = {
   title: "Mission Control",
   robots: { index: false, follow: false },

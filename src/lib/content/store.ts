@@ -27,7 +27,9 @@ interface Store {
 
 /* ---------------------------------- file ---------------------------------- */
 
-const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
+// On Vercel the project folder is read-only; without MongoDB fall back to /tmp (temporary!).
+const ON_VERCEL = Boolean(process.env.VERCEL);
+const DATA_DIR = process.env.DATA_DIR || (ON_VERCEL ? "/tmp/portfolio-data" : path.join(process.cwd(), "data"));
 const safeKey = (key: string) => key.replace(/[^a-z0-9_-]/gi, "_");
 
 const MESSAGES_FILE = () => path.join(DATA_DIR, "messages.json");
@@ -119,7 +121,16 @@ const globalForMongo = globalThis as unknown as { __portfolioMongo?: Promise<Mon
 async function collection(): Promise<Collection<Doc>> {
   if (!globalForMongo.__portfolioMongo) {
     const { MongoClient } = await import("mongodb");
-    globalForMongo.__portfolioMongo = new MongoClient(process.env.MONGODB_URI!).connect();
+    globalForMongo.__portfolioMongo = new MongoClient(process.env.MONGODB_URI!, {
+      appName: "portfolio",
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 8000,
+    })
+      .connect()
+      .catch((err) => {
+        globalForMongo.__portfolioMongo = undefined; // allow a retry on the next request
+        throw err;
+      });
   }
   const client = await globalForMongo.__portfolioMongo;
   return client.db(process.env.MONGODB_DB || "portfolio").collection<Doc>("site");
@@ -188,7 +199,7 @@ const mongoStore: Store = {
 };
 
 export const store: Store = process.env.MONGODB_URI ? mongoStore : fileStore;
-export const storageKind = process.env.MONGODB_URI ? "mongodb" : "file";
+export const storageKind = process.env.MONGODB_URI ? "mongodb" : ON_VERCEL ? "temporary" : "file";
 
 /* --------------------------------- helpers -------------------------------- */
 

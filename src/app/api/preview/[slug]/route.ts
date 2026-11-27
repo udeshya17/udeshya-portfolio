@@ -2,6 +2,9 @@ import { connection } from "next/server";
 import { getContent } from "@/lib/content/get";
 import { getOrCapturePreview } from "@/lib/preview";
 
+/** Capturing a site can take ~15s the first time. */
+export const maxDuration = 60;
+
 /** Live website preview for a project (only for URLs listed in the site content). */
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
   await connection();

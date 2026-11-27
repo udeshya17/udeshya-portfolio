@@ -64,15 +64,16 @@ export async function refreshStats(): Promise<ActionResult> {
 
 /* ---------------------------------- files --------------------------------- */
 
-const MAX_RESUME = 10 * 1024 * 1024;
-const MAX_IMAGE = 8 * 1024 * 1024;
+// Vercel limits request bodies to 4.5 MB, so keep uploads under 4 MB
+const MAX_RESUME = 4 * 1024 * 1024;
+const MAX_IMAGE = 4 * 1024 * 1024;
 const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/avif"];
 
 export async function uploadResume(formData: FormData): Promise<ActionResult> {
   await requireAdmin();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Choose a PDF first." };
-  if (file.size > MAX_RESUME) return { ok: false, message: "PDF must be under 10 MB." };
+  if (file.size > MAX_RESUME) return { ok: false, message: "PDF must be under 4 MB." };
   const data = Buffer.from(await file.arrayBuffer());
   if (data.subarray(0, 5).toString() !== "%PDF-") return { ok: false, message: "That file is not a PDF." };
 
@@ -100,7 +101,7 @@ export async function uploadImage(formData: FormData): Promise<ActionResult> {
   await requireAdmin();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Choose an image first." };
-  if (file.size > MAX_IMAGE) return { ok: false, message: "Image must be under 8 MB." };
+  if (file.size > MAX_IMAGE) return { ok: false, message: "Image must be under 4 MB (compress it at squoosh.app)." };
   if (!IMAGE_TYPES.includes(file.type)) return { ok: false, message: "Use PNG, JPG, WebP, GIF or AVIF." };
   const key = `img-${randomUUID()}`;
   await store.writeFile(key, {
