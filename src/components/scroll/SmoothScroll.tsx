@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { useEffect } from "react";
-import { LOADER_DONE_EVENT, computeMorph, measureAnchors, scrollState, setActive } from "./scrollState";
+import { LOADER_DONE_EVENT, scrollState } from "./scrollState";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,8 +25,6 @@ export default function SmoothScroll() {
       scrollState.y = y;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       scrollState.progress = max > 0 ? y / max : 0;
-      scrollState.morph = computeMorph(y);
-      setActive(Math.round(scrollState.morph));
     };
 
     const raf = (time: number) => {
@@ -44,10 +42,7 @@ export default function SmoothScroll() {
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
 
-    const onRefresh = () => {
-      measureAnchors();
-      update();
-    };
+    const onRefresh = () => update();
     ScrollTrigger.addEventListener("refresh", onRefresh);
     const ro = new ResizeObserver(() => ScrollTrigger.refresh());
     ro.observe(document.body);

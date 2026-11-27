@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Profile, Project } from "@/lib/content/types";
 import SiteFooter from "../SiteFooter";
-import { UniverseLock } from "../SiteChrome";
+import { RealmLock } from "../world/Stage";
 import { BrowserFrame, GenerativeCover, previewSrc } from "../ui/ProjectVisual";
 import SectionLink from "../ui/SectionLink";
 import { FadeIn, Reveal } from "../ui/primitives";
@@ -39,7 +39,7 @@ export default function ProjectDetail({ p, next, index, total, profile }: { p: P
 
   return (
     <main className="relative isolate z-10">
-      <UniverseLock index={5} />
+      <RealmLock realm="sky" />
       {/* the 3D scene recedes once you start reading */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,transparent_0,rgb(4_4_10/0.55)_45vh,rgb(4_4_10/0.9)_95vh,rgb(4_4_10/0.94)_100%)]" />
 
@@ -197,11 +197,11 @@ export default function ProjectDetail({ p, next, index, total, profile }: { p: P
           </Link>
         )}
 
-        <section className="mt-16 flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+        <section className="mt-16 flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
           <p className="max-w-2xl font-display text-3xl leading-tight font-bold tracking-tight md:text-5xl">
             Have something <span className="font-serif font-normal text-accent italic">similar</span> in mind?
           </p>
-          <Link href="/contact" className="group inline-flex items-center gap-3 rounded-full bg-accent py-2 pr-2 pl-7 text-lg font-semibold text-black">
+          <Link href="/contact" className="group inline-flex shrink-0 items-center gap-3 rounded-full bg-accent py-2 pr-2 pl-7 text-lg font-semibold whitespace-nowrap text-black">
             Start a project
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black text-accent transition-transform duration-500 group-hover:-rotate-45">→</span>
           </Link>

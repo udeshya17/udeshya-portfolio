@@ -9,7 +9,7 @@ import type { Profile } from "@/lib/content/types";
 import { LOADER_DONE_EVENT, scrollState, scrollToId, subscribeActive } from "../scroll/scrollState";
 import { SocialLinks } from "../ui/SocialIcon";
 import { Magnetic, Scramble } from "../ui/primitives";
-import { UNIVERSES } from "../universes";
+import { REALMS } from "../world/realms";
 
 export const useActive = () =>
   useSyncExternalStore(
@@ -97,14 +97,14 @@ function Island() {
   const go = useGoToUniverse();
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
-  const u = UNIVERSES[active] ?? UNIVERSES[0];
-  // on the home page the pill follows the section you're in
-  const sectionPage = u.id === "projects" ? "/#projects" : u.id === "about" ? "/#about" : u.id === "contact" ? "/contact" : "/";
+  const u = REALMS[active] ?? REALMS[0];
+  // on the home page the pill follows the world you're in
+  const sectionPage = u.kind === "sky" ? "/#projects" : "/";
   const current = pathname === "/" ? sectionPage : (PAGES.find((p) => isActivePage(pathname, p.href))?.href ?? null);
   const pill = hover ?? current;
 
   return (
-    <div className="pointer-events-auto relative hidden md:block" onMouseLeave={() => setOpen(false)}>
+    <div className="pointer-events-auto relative hidden lg:block" onMouseLeave={() => setOpen(false)}>
       <nav className="glass flex items-center gap-1 rounded-full p-1.5" aria-label="Primary">
         <button
           onMouseEnter={() => setOpen(true)}
@@ -114,8 +114,8 @@ function Island() {
           className="flex items-center gap-2.5 rounded-full py-1 pr-3 pl-1.5 transition-colors hover:bg-white/5"
         >
           <ProgressRing />
-          <span className="font-mono text-[11px] tracking-[0.2em] text-accent">U·{String(active + 1).padStart(2, "0")}</span>
-          <span className="relative h-4 w-24 overflow-hidden text-left text-[13px] font-medium">
+          <span className="font-mono text-[11px] tracking-[0.2em] text-accent">{String(active + 1).padStart(2, "0")}</span>
+          <span className="relative h-4 w-28 overflow-hidden text-left text-[13px] font-medium">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.span
                 key={u.name}
@@ -172,26 +172,27 @@ function Island() {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-full left-0 pt-3"
           >
-            <div className="w-[min(640px,80vw)] rounded-3xl border border-line bg-[#0a0a12]/95 p-3 shadow-2xl backdrop-blur-2xl">
-              <p className="px-3 pt-1 pb-3 font-mono text-[10px] tracking-[0.3em] text-fog uppercase">Jump to a universe</p>
-              <div className="grid grid-cols-3 gap-1">
-                {UNIVERSES.map((x, i) => (
+            <div className="w-[min(400px,80vw)] rounded-3xl border border-line bg-[#0a0a12]/95 p-3 shadow-2xl backdrop-blur-2xl">
+              <p className="px-3 pt-1 pb-3 font-mono text-[10px] tracking-[0.3em] text-fog uppercase">Jump to a world</p>
+              <div className="grid gap-1">
+                {REALMS.map((x, i) => (
                   <button
                     key={x.id}
                     onClick={() => {
                       setOpen(false);
                       go(x.id);
                     }}
-                    className={`group flex items-center gap-3 rounded-2xl p-3 text-left transition-colors hover:bg-white/5 ${i === active ? "bg-white/[0.06]" : ""}`}
+                    className={`group flex items-center gap-4 rounded-2xl p-3 text-left transition-colors hover:bg-white/5 ${i === active ? "bg-white/[0.06]" : ""}`}
                   >
                     <span
-                      className="h-8 w-8 shrink-0 rounded-full transition-transform duration-500 group-hover:scale-110"
-                      style={{ background: `radial-gradient(circle at 35% 30%, ${x.colors[2]}, ${x.colors[1]} 45%, ${x.colors[0]} 80%)`, boxShadow: `0 0 18px ${x.ui[0]}55` }}
+                      className="h-9 w-9 shrink-0 rounded-full transition-transform duration-500 group-hover:scale-110"
+                      style={{ background: `radial-gradient(circle at 35% 30%, ${x.swatch[0]}, ${x.swatch[1]} 48%, ${x.swatch[2]} 88%)`, boxShadow: `0 0 18px ${x.ui[0]}55` }}
                     />
-                    <span className="min-w-0">
-                      <span className="block font-mono text-[10px] text-fog">U·{String(i + 1).padStart(2, "0")}</span>
-                      <span className="block truncate text-[13px] font-medium">{x.name}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[14px] font-medium">{x.name}</span>
+                      <span className="block truncate text-[12px] text-fog">{x.nav}</span>
                     </span>
+                    <span className="font-mono text-[10px] text-fog">{String(i + 1).padStart(2, "0")}</span>
                   </button>
                 ))}
               </div>
@@ -203,7 +204,8 @@ function Island() {
   );
 }
 
-function Clock({ timezone }: { timezone: string }) {
+/** A live clock in the given IANA timezone. */
+export function Clock({ timezone }: { timezone: string }) {
   const [now, setNow] = useState<string>("");
   useEffect(() => {
     const fmt = () => {
@@ -250,11 +252,11 @@ function Menu({ open, onClose, profile }: { open: boolean; onClose: () => void; 
           data-lenis-prevent
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,color-mix(in_srgb,var(--accent)_22%,transparent),transparent_45%),radial-gradient(circle_at_10%_90%,color-mix(in_srgb,var(--accent-2)_14%,transparent),transparent_40%)]" />
-          <div className="relative mx-auto grid min-h-full max-w-[1500px] grid-cols-1 gap-12 px-6 pt-24 pb-28 md:grid-cols-[1.3fr_1fr] md:px-12 md:pb-10">
+          <div className="relative mx-auto grid min-h-full max-w-[1500px] grid-cols-1 gap-12 px-6 pt-24 pb-28 lg:grid-cols-[1.3fr_1fr] md:px-12 lg:pb-10">
             <div>
-              <p className="mb-4 font-mono text-[11px] tracking-[0.3em] text-fog uppercase">Universes</p>
+              <p className="mb-4 font-mono text-[11px] tracking-[0.3em] text-fog uppercase">Worlds</p>
               <ul className="flex flex-col">
-                {UNIVERSES.map((u, i) => (
+                {REALMS.map((u, i) => (
                   <motion.li
                     key={u.id}
                     initial={{ y: 60, opacity: 0 }}
@@ -267,9 +269,9 @@ function Menu({ open, onClose, profile }: { open: boolean; onClose: () => void; 
                       <span className="w-8 font-mono text-xs text-fog">{String(i + 1).padStart(2, "0")}</span>
                       <span className="h-2.5 w-2.5 shrink-0 rounded-full transition-transform duration-500 group-hover:scale-[2.2]" style={{ background: u.ui[0], boxShadow: `0 0 14px ${u.ui[0]}` }} />
                       <span className="relative block h-[1.05em] overflow-hidden font-display text-[clamp(1.8rem,5vh,3.4rem)] leading-[1.05] font-bold tracking-tight">
-                        <span className={`block transition-transform duration-500 ease-out-expo group-hover:-translate-y-full ${i === active ? "text-accent" : ""}`}>{u.nav}</span>
+                        <span className={`block transition-transform duration-500 ease-out-expo group-hover:-translate-y-full ${i === active ? "text-accent" : ""}`}>{u.name}</span>
                         <span className="block font-serif font-normal italic transition-transform duration-500 ease-out-expo group-hover:-translate-y-full" style={{ color: u.ui[0] }}>
-                          {u.name}
+                          {u.nav}
                         </span>
                       </span>
                     </button>
@@ -282,11 +284,11 @@ function Menu({ open, onClose, profile }: { open: boolean; onClose: () => void; 
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ delay: 0.45, duration: 0.8 }}
-              className="flex flex-col gap-10 text-sm md:justify-end"
+              className="flex flex-col gap-10 text-sm lg:justify-end"
             >
               <div>
                 <p className="mb-4 font-mono text-[11px] tracking-[0.3em] text-fog uppercase">Pages</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:grid-cols-2">
                   {[
                     { href: "/#projects", label: "Selected work", sub: "Case studies" },
                     { href: "/contact", label: "Contact", sub: "Start a project" },
@@ -326,7 +328,7 @@ function Menu({ open, onClose, profile }: { open: boolean; onClose: () => void; 
               </div>
               <div>
                 <p className="mb-3 font-mono text-[11px] tracking-[0.3em] text-fog uppercase">Say hello</p>
-                <a href={`mailto:${profile.email}`} className="font-display text-2xl font-semibold break-all hover:text-accent md:text-3xl">
+                <a href={`mailto:${profile.email}`} className="font-display text-[clamp(1.25rem,5vw,1.9rem)] font-semibold [overflow-wrap:anywhere] hover:text-accent">
                   {profile.email}
                 </a>
               </div>

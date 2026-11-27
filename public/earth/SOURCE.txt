@@ -1,0 +1,3 @@
+Earth imagery: NASA Blue Marble (day) and Black Marble (night lights), public domain,
+via the three-globe (MIT) and three.js (MIT) example textures.
+clouds.webp and ocean.webp are greyscale masks.

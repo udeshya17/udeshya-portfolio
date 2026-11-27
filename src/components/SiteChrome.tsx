@@ -1,7 +1,6 @@
 "use client";
 
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import type { Profile } from "@/lib/content/types";
@@ -9,18 +8,16 @@ import Cursor from "./cursor/Cursor";
 import Loader from "./loader/Loader";
 import MobileDock from "./nav/MobileDock";
 import Navbar from "./nav/Navbar";
-import { scrollState, scrollToId, setLock, subscribeActive } from "./scroll/scrollState";
+import { scrollState, scrollToId, subscribeActive } from "./scroll/scrollState";
 import SmoothScroll from "./scroll/SmoothScroll";
-import UniverseSignal from "./UniverseSignal";
-import { UNIVERSES } from "./universes";
+import { REALMS } from "./world/realms";
+import Stage from "./world/Stage";
 
-const Scene = dynamic(() => import("./three/Scene"), { ssr: false });
-
-/** Keeps the CSS accent colours in sync with the active universe. */
+/** Keeps the CSS accent colours in sync with the world you're in. */
 function AccentSync() {
   useEffect(() => {
     const apply = () => {
-      const u = UNIVERSES[Math.max(0, scrollState.active)] ?? UNIVERSES[0];
+      const u = REALMS[Math.max(0, scrollState.active)] ?? REALMS[0];
       document.documentElement.style.setProperty("--accent", u.ui[0]);
       document.documentElement.style.setProperty("--accent-2", u.ui[1]);
     };
@@ -65,15 +62,6 @@ function RouteSync() {
   return null;
 }
 
-/** Pins the 3D scene to one universe while mounted (used by non-home pages). */
-export function UniverseLock({ index }: { index: number }) {
-  useEffect(() => {
-    setLock(index);
-    return () => setLock(null);
-  }, [index]);
-  return null;
-}
-
 export default function SiteChrome({ profile, children }: { profile: Profile; children: ReactNode }) {
   return (
     <>
@@ -81,12 +69,10 @@ export default function SiteChrome({ profile, children }: { profile: Profile; ch
       <SmoothScroll />
       <RouteSync />
       <AccentSync />
-      <Scene />
+      <Stage />
       <Cursor />
-      <div className="grain" aria-hidden />
       <Navbar profile={profile} />
       <MobileDock />
-      <UniverseSignal />
       {children}
     </>
   );

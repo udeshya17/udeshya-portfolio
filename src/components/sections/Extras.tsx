@@ -11,13 +11,13 @@ import { FadeIn, Reveal } from "../ui/primitives";
 export function Services({ services }: { services: Service[] }) {
   if (!services.length) return null;
   return (
-    <section id="services" className="veil relative isolate z-10 px-5 py-28 md:px-10 md:py-40">
-      <div className="mx-auto grid max-w-[1500px] gap-12 md:grid-cols-[0.9fr_1.1fr]">
-        <div className="md:sticky md:top-32 md:self-start">
+    <section id="services" className="veil relative isolate z-10 px-5 pt-28 pb-44 md:px-10 md:pt-40 md:pb-60">
+      <div className="mx-auto grid max-w-[1500px] gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="lg:sticky lg:top-32 lg:self-start">
           <p className="mb-6 font-mono text-[11px] tracking-[0.28em] text-fog uppercase">
             <span className="text-accent">✦</span> What I do for you
           </p>
-          <Reveal as="h2" type="words" className="font-display text-[8.2vw] leading-[0.95] font-extrabold tracking-tight sm:text-5xl md:text-7xl">
+          <Reveal as="h2" type="words" className="h-section">
             Services that <span className="font-serif font-normal text-accent italic">ship.</span>
           </Reveal>
           <Reveal as="p" className="mt-6 max-w-md text-lg text-fog">
@@ -80,18 +80,18 @@ export function Process({ steps }: { steps: ProcessStep[] }) {
   }, [steps]);
   if (!steps.length) return null;
   return (
-    <section ref={root} id="process" className="veil relative isolate z-10 px-5 py-28 md:px-10 md:py-36">
+    <section ref={root} id="process" className="relative isolate z-10 px-5 pt-28 pb-44 md:px-10 md:pt-36 md:pb-60">
       <div className="mx-auto max-w-[1500px]">
         <p className="mb-6 font-mono text-[11px] tracking-[0.28em] text-fog uppercase">
           <span className="text-accent">✦</span> How we&apos;ll work
         </p>
-        <Reveal as="h2" type="words" className="max-w-4xl font-display text-[8.2vw] leading-[0.95] font-extrabold tracking-tight sm:text-5xl md:text-7xl">
+        <Reveal as="h2" type="words" className="h-section max-w-4xl">
           From first call to <span className="font-serif font-normal text-accent italic">first users.</span>
         </Reveal>
         <div className="process-grid relative mt-20">
-          <div className="absolute top-[22px] right-0 left-0 hidden h-px bg-line md:block" />
-          <div className="process-line absolute top-[22px] right-0 left-0 hidden h-px origin-left bg-gradient-to-r from-accent via-accent-2 to-accent md:block" />
-          <ol className="grid gap-8 md:grid-cols-5 md:gap-6">
+          <div className="absolute top-[22px] right-0 left-0 hidden h-px bg-line lg:block" />
+          <div className="process-line absolute top-[22px] right-0 left-0 hidden h-px origin-left bg-gradient-to-r from-accent via-accent-2 to-accent lg:block" />
+          <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
             {steps.map((s, i) => (
               <li key={s.title} className="process-step relative">
                 <span className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full border border-accent/40 bg-void font-mono text-sm text-accent shadow-[0_0_30px_color-mix(in_srgb,var(--accent)_35%,transparent)]">
@@ -119,7 +119,7 @@ export function Testimonials({ items }: { items: Testimonial[] }) {
         <p className="mb-6 font-mono text-[11px] tracking-[0.28em] text-fog uppercase">
           <span className="text-accent">✦</span> Kind words
         </p>
-        <Reveal as="h2" type="words" className="max-w-4xl font-display text-[8.2vw] leading-[0.95] font-extrabold tracking-tight sm:text-5xl md:text-7xl">
+        <Reveal as="h2" type="words" className="h-section max-w-4xl">
           People I&apos;ve <span className="font-serif font-normal text-accent italic">built with.</span>
         </Reveal>
       </div>

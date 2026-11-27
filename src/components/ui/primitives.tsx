@@ -4,7 +4,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { scrollState } from "../scroll/scrollState";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -183,51 +182,12 @@ export function Counter({ value, suffix = "", className }: { value: number; suff
   );
 }
 
-/** Section eyebrow: "U·03 — Constellation". */
-export function UniverseTag({ index, name, className = "" }: { index: number; name: string; className?: string }) {
+/** Section eyebrow: "✦ Selected work". */
+export function Kicker({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`flex items-center gap-3 font-mono text-[11px] tracking-[0.28em] text-fog uppercase ${className}`}>
-      <span className="text-accent">U·{String(index).padStart(2, "0")}</span>
-      <span className="h-px w-10 bg-line" />
-      <span>Universe of {name}</span>
-    </div>
-  );
-}
-
-/** Infinite marquee whose speed and skew react to scroll velocity. */
-export function VelocityMarquee({ items, className = "", reverse = false }: { items: string[]; className?: string; reverse?: boolean }) {
-  const track = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = track.current;
-    if (!el) return;
-    let x = 0;
-    let skew = 0;
-    const dir = reverse ? 1 : -1;
-    const tick = () => {
-      const vel = scrollState.velocity;
-      x += dir * (1.6 + Math.min(Math.abs(vel) * 0.3, 14));
-      const half = el.scrollWidth / 2;
-      if (half > 0) x = ((x % half) - half) % half;
-      skew += (Math.max(-12, Math.min(12, vel * 0.35)) - skew) * 0.1;
-      el.style.transform = `translate3d(${x}px,0,0) skewX(${-skew}deg)`;
-    };
-    gsap.ticker.add(tick);
-    return () => gsap.ticker.remove(tick);
-  }, [reverse]);
-  return (
-    <div className={`overflow-hidden whitespace-nowrap ${className}`}>
-      <div ref={track} className="inline-flex will-change-transform">
-        {[0, 1].map((k) => (
-          <div key={k} className="flex shrink-0 items-center" aria-hidden={k === 1}>
-            {items.map((t, i) => (
-              <span key={i} className="flex items-center">
-                <span className={i % 2 ? "text-outline" : ""}>{t}</span>
-                <span className="mx-[0.35em] inline-block h-[0.32em] w-[0.32em] rotate-45 bg-accent" />
-              </span>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
+    <p className={`flex items-center gap-3 font-mono text-[11px] tracking-[0.28em] text-fog uppercase ${className}`}>
+      <span className="text-accent">✦</span>
+      {children}
+    </p>
   );
 }

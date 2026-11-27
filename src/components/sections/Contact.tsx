@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Profile, ResumeMeta } from "@/lib/content/types";
 import Link from "next/link";
 import SiteFooter from "../SiteFooter";
-import { FadeIn, Magnetic, Reveal, UniverseTag } from "../ui/primitives";
+import { FadeIn, Kicker, Magnetic, Reveal } from "../ui/primitives";
 
 export default function Contact({ profile, resume }: { profile: Profile; resume: ResumeMeta }) {
   const [copied, setCopied] = useState(false);
@@ -20,11 +20,11 @@ export default function Contact({ profile, resume }: { profile: Profile; resume:
   const updated = new Date(resume.updatedAt);
 
   return (
-    <section id="contact" data-universe className="relative z-10 flex min-h-[100svh] flex-col justify-end px-5 pt-[36vh] pb-6 md:px-10 md:pt-40">
+    <section id="contact" className="relative z-10 flex min-h-[100svh] flex-col justify-end px-5 pt-32 pb-6 md:px-10 lg:pt-40">
       <div className="mx-auto w-full max-w-[1500px]">
-        <div className="md:w-[54%]">
-          <UniverseTag index={9} name="Hello" className="mb-8" />
-          <Reveal as="h2" type="words" className="font-display text-[8.2vw] leading-[0.95] sm:text-5xl font-extrabold tracking-tight md:text-7xl">
+        <div className="lg:w-[54%]">
+          <Kicker className="mb-8">Say hello</Kicker>
+          <Reveal as="h2" type="words" className="h-section">
             Got a universe that needs <span className="font-serif font-normal text-accent italic">building?</span>
           </Reveal>
 

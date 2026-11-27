@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Instrument_Serif, Syne } from "next/font/google";
 import { getContent } from "@/lib/content/get";
 import { siteUrl } from "@/lib/og";
 import "./globals.css";
+import "./world.css";
 
 const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["500", "600", "700", "800"] });
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });

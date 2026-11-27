@@ -5,12 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { LOADER_DONE_EVENT, scrollState } from "../scroll/scrollState";
 
 const LINES = [
-  "Igniting the singularity",
-  "Compiling 18,000 stars",
-  "Folding spacetime",
-  "Syncing the multiverse",
-  "Growing a forest",
-  "Calibrating gravity",
+  "Charting the stars",
+  "Filling the oceans",
+  "Growing the forests",
+  "Painting the skies",
+  "Waking the aurora",
+  "Opening the gates",
 ];
 
 const COLS = 6;

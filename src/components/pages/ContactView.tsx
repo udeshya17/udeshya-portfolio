@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { sendMessage, type ContactState } from "@/app/(site)/contact/actions";
 import type { ContactConfig, Faq, Profile } from "@/lib/content/types";
 import SiteFooter from "../SiteFooter";
-import { UniverseLock } from "../SiteChrome";
+import { RealmLock } from "../world/Stage";
 import { SocialLinks } from "../ui/SocialIcon";
 import { FadeIn, Reveal } from "../ui/primitives";
 
@@ -156,13 +156,13 @@ export default function ContactView({ profile, config, faqs }: { profile: Profil
 
   return (
     <main className="relative z-10 px-5 pt-32 md:px-10 md:pt-40">
-      <UniverseLock index={2} />
+      <RealmLock realm="aurora" />
       <div className="mx-auto max-w-[1500px]">
         <p className="mb-6 flex items-center gap-3 font-mono text-[11px] tracking-[0.28em] text-fog uppercase">
           <span className={`h-2 w-2 rounded-full ${profile.available ? "animate-pulse-dot bg-accent" : "bg-fog"}`} />
           {profile.availabilityText}
         </p>
-        <Reveal as="h1" type="words" className="max-w-5xl font-display text-[10vw] leading-[0.92] font-extrabold tracking-tight md:text-8xl">
+        <Reveal as="h1" type="words" className="h-page max-w-5xl">
           {config.heading}
         </Reveal>
         <Reveal as="p" className="mt-6 max-w-xl text-lg text-fog">
@@ -214,7 +214,7 @@ export default function ContactView({ profile, config, faqs }: { profile: Profil
             <p className="mb-6 font-mono text-[11px] tracking-[0.28em] text-fog uppercase">
               <span className="text-accent">✦</span> Good to know
             </p>
-            <Reveal as="h2" type="words" className="mb-10 font-display text-[8.2vw] leading-[0.95] font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+            <Reveal as="h2" type="words" className="h-sub mb-10">
               Questions, <span className="font-serif font-normal text-accent italic">answered.</span>
             </Reveal>
             <FaqList faqs={faqs} />

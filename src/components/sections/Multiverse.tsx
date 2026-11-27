@@ -3,8 +3,7 @@
 import gsap from "gsap";
 import { useEffect, useRef } from "react";
 import type { Domain } from "@/lib/content/types";
-import Numeral from "../ui/Numeral";
-import { Reveal, UniverseTag } from "../ui/primitives";
+import { Kicker, Reveal } from "../ui/primitives";
 
 const HUES = ["#f7931a", "#b69cff", "#ff5c8a", "#ffb547", "#7c5cff", "#3fffb0", "#3fe0ff", "#d4ff3f", "#ff7a3d"];
 
@@ -50,17 +49,16 @@ export default function Multiverse({ domains }: { domains: Domain[] }) {
   }, [domains]);
 
   return (
-    <section id="multiverse" data-universe className="relative isolate z-10 min-h-screen px-5 py-32 md:px-10 md:py-44">
-      <Numeral n={3} side="left" />
+    <section id="multiverse" className="relative isolate z-10 px-5 pt-40 pb-32 md:px-10 md:pt-56 md:pb-44">
       <div className="mx-auto max-w-[1500px]">
-        <div className="grid items-end gap-8 md:grid-cols-[1.5fr_1fr]">
+        <div className="grid items-end gap-8 lg:grid-cols-[1.5fr_1fr]">
           <div>
-            <UniverseTag index={3} name="Possibility" className="mb-8" />
-            <Reveal as="h2" type="words" className="font-display text-[8.2vw] leading-[0.95] font-extrabold tracking-tight sm:text-5xl md:text-8xl">
+            <Kicker className="mb-8">Domains</Kicker>
+            <Reveal as="h2" type="words" className="h-section">
               One developer. <span className="font-serif font-normal text-accent italic">{domains.length}</span> universes.
             </Reveal>
           </div>
-          <Reveal as="p" className="max-w-md text-lg leading-relaxed text-fog md:justify-self-end">
+          <Reveal as="p" className="max-w-md text-lg leading-relaxed text-fog lg:justify-self-end">
             Most engineers live in one domain. I travel between them, carrying patterns from fintech into healthcare, and from AI into everything.
           </Reveal>
         </div>
@@ -80,13 +78,13 @@ export default function Multiverse({ domains }: { domains: Domain[] }) {
                   className="absolute inset-0 origin-left scale-x-0 transition-transform duration-700 ease-out-expo group-hover:scale-x-100"
                   style={{ background: `linear-gradient(90deg, ${hue}26, transparent 70%)` }}
                 />
-                <div className="relative grid grid-cols-[2.5rem_1fr] items-baseline gap-x-4 gap-y-3 py-7 md:grid-cols-[4rem_1.1fr_1.2fr_auto] md:py-9">
+                <div className="relative grid grid-cols-[2.5rem_1fr] items-baseline gap-x-4 gap-y-3 py-7 md:grid-cols-[3rem_1fr] lg:grid-cols-[4rem_1.1fr_1.2fr_auto] md:py-9">
                   <span className="font-mono text-xs text-fog">{String(i + 1).padStart(2, "0")}</span>
                   <h3 className="font-display text-3xl font-bold tracking-tight transition-[translate] duration-700 ease-out-expo group-hover:translate-x-4 md:text-5xl" style={{ ["--h" as string]: hue }}>
                     <span className="transition-colors duration-500 group-hover:text-[var(--h)]">{d.name}</span>
                   </h3>
-                  <p className="col-start-2 max-w-md text-[15px] leading-relaxed text-fog md:col-start-auto">{d.blurb}</p>
-                  <div className="col-start-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[11px] text-bone/60 md:col-start-auto md:max-w-[14rem] md:justify-end">
+                  <p className="col-start-2 max-w-xl text-[15px] leading-relaxed text-fog lg:col-start-auto">{d.blurb}</p>
+                  <div className="col-start-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[11px] text-bone/60 lg:col-start-auto lg:max-w-[14rem] lg:justify-end">
                     {d.tags.map((t) => (
                       <span key={t}>{t}</span>
                     ))}

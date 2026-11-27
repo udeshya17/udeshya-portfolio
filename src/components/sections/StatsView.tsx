@@ -3,7 +3,7 @@
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import type { CalendarDay, GithubStats, LeetcodeStats, StatsFailure } from "@/lib/stats/types";
-import { Counter, FadeIn, Reveal, UniverseTag } from "../ui/primitives";
+import { Counter, FadeIn, Kicker, Reveal } from "../ui/primitives";
 
 // Validated categorical palette (dark surface): always paired with text labels.
 const DIFF = { easy: "#0fa596", medium: "#c98a00", hard: "#f43f5e" } as const;
@@ -48,8 +48,17 @@ function Heatmap({ days, hue, unit }: { days: CalendarDay[]; hue: string; unit: 
 
   const opacity = [0.07, 0.3, 0.52, 0.76, 1];
   return (
-    <div ref={ref} className="relative">
-      <div className="no-scrollbar overflow-x-auto" data-lenis-prevent>
+    <div ref={ref} className="relative min-w-0">
+      <div
+        className="no-scrollbar overflow-x-auto overscroll-x-contain"
+        data-lenis-prevent
+        ref={(el) => {
+          if (el && !el.dataset.init) {
+            el.dataset.init = "1";
+            el.scrollLeft = el.scrollWidth; // newest activity first on small screens
+          }
+        }}
+      >
         <div className="flex w-max gap-[3px]" onPointerLeave={() => setTip(null)}>
           {visible.map((w, i) => (
             <div key={i} className="hm-col flex flex-col gap-[3px]">
@@ -100,9 +109,9 @@ function Heatmap({ days, hue, unit }: { days: CalendarDay[]; hue: string; unit: 
 
 function Tile({ label, value, suffix = "", hint }: { label: string; value: number | null; suffix?: string; hint?: string }) {
   return (
-    <div className="rounded-2xl border border-line bg-white/[0.02] p-4">
+    <div className="min-w-0 rounded-2xl border border-line bg-white/[0.02] p-3.5 sm:p-4">
       <p className="font-mono text-[10px] tracking-[0.2em] text-fog uppercase">{label}</p>
-      <p className="mt-2 font-display text-2xl font-bold tracking-tight md:text-3xl">
+      <p className="mt-2 truncate font-display text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">
         {value === null ? "—" : <Counter value={value} suffix={suffix} />}
       </p>
       {hint && <p className="mt-1 text-xs text-fog">{hint}</p>}
@@ -113,9 +122,9 @@ function Tile({ label, value, suffix = "", hint }: { label: string; value: numbe
 function PanelHeader({ kicker, title, href }: { kicker: string; title: string; href: string }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <div>
+      <div className="min-w-0">
         <p className="font-mono text-[11px] tracking-[0.25em] text-fog uppercase">{kicker}</p>
-        <h3 className="mt-2 font-display text-3xl font-bold tracking-tight">{title}</h3>
+        <h3 className="mt-2 truncate font-display text-2xl font-bold tracking-tight sm:text-3xl">{title}</h3>
       </div>
       <a href={href} target="_blank" rel="noreferrer" className="rounded-full border border-line px-4 py-2 text-sm whitespace-nowrap hover:border-accent hover:text-accent">
         Profile ↗
@@ -204,7 +213,7 @@ function DifficultyRings({ s }: { s: LeetcodeStats }) {
 
 function Leetcode({ s }: { s: LeetcodeStats }) {
   return (
-    <div className="rounded-[2rem] border border-line bg-[#090b14]/90 p-6 backdrop-blur-xl md:p-9">
+    <div className="min-w-0 rounded-[1.5rem] border border-line bg-[#090b14]/90 p-5 backdrop-blur-xl sm:rounded-[2rem] sm:p-6 md:p-9">
       <PanelHeader kicker="LeetCode · problem solving" title={`@${s.username}`} href={s.url} />
       <div className="mt-8 flex flex-col items-center gap-8 sm:flex-row">
         <DifficultyRings s={s} />
@@ -259,14 +268,14 @@ function Leetcode({ s }: { s: LeetcodeStats }) {
 function Github({ s }: { s: GithubStats }) {
   const totalLang = s.languages.reduce((a, l) => a + l.count, 0) || 1;
   return (
-    <div className="rounded-[2rem] border border-line bg-[#090b14]/90 p-6 backdrop-blur-xl md:p-9">
+    <div className="min-w-0 rounded-[1.5rem] border border-line bg-[#090b14]/90 p-5 backdrop-blur-xl sm:rounded-[2rem] sm:p-6 md:p-9">
       <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={s.avatar} alt="" className="h-14 w-14 rounded-2xl border border-line" />
           <div>
             <p className="font-mono text-[11px] tracking-[0.25em] text-fog uppercase">GitHub · open source</p>
-            <h3 className="mt-1 font-display text-3xl font-bold tracking-tight">@{s.username}</h3>
+            <h3 className="mt-1 truncate font-display text-2xl font-bold tracking-tight sm:text-3xl">@{s.username}</h3>
           </div>
         </div>
         <a href={s.url} target="_blank" rel="noreferrer" className="rounded-full border border-line px-4 py-2 text-sm whitespace-nowrap hover:border-accent hover:text-accent">
@@ -339,15 +348,15 @@ export default function StatsView({
   return (
     <div className="mx-auto max-w-[1500px]">
       <div className="max-w-3xl">
-        <UniverseTag index={8} name="Signal" className="mb-8" />
-        <Reveal as="h2" type="words" className="font-display text-[8.2vw] leading-[0.95] sm:text-5xl font-extrabold tracking-tight md:text-7xl">
+        <Kicker className="mb-8">Live signal</Kicker>
+        <Reveal as="h2" type="words" className="h-section">
           The <span className="font-serif font-normal text-cyan italic">signal</span> behind the noise.
         </Reveal>
         <Reveal as="p" className="mt-6 max-w-lg text-lg text-fog">
           Live from LeetCode and GitHub, refreshed every few hours. Problem solving and shipping, measured.
         </Reveal>
       </div>
-      <div className="mt-16 grid items-start gap-5 lg:grid-cols-2">
+      <div className="mt-16 grid items-start gap-5 [&>*]:min-w-0 lg:grid-cols-2">
         {leetcode && (
           <FadeIn y={60}>{leetcode.ok ? <Leetcode s={leetcode} /> : <Failure name="LeetCode" f={leetcode} />}</FadeIn>
         )}

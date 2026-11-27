@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useActive } from "./Navbar";
 import { LOADER_DONE_EVENT, scrollState, scrollToId } from "../scroll/scrollState";
-import { UNIVERSES } from "../universes";
+import { REALMS } from "../world/realms";
 
 const ICONS = {
   home: "M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5",
@@ -48,12 +48,12 @@ export default function MobileDock() {
 
   const active = useActive();
   const onHome = pathname === "/";
-  const inWork = onHome && UNIVERSES[active]?.id === "projects";
+  const inWork = onHome && REALMS[active]?.kind === "sky";
   const isActive = (href: string) =>
     href === "/#projects" ? inWork : href === "/" ? onHome && !inWork : pathname.startsWith(href);
 
   return (
-    <nav ref={ref} aria-label="Quick navigation" className="fixed inset-x-0 bottom-4 z-[80] flex justify-center px-4 md:hidden">
+    <nav ref={ref} aria-label="Quick navigation" className="fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[80] flex justify-center px-4 lg:hidden">
       <div className="relative flex items-center gap-1 overflow-hidden rounded-full border border-line bg-[#0a0a12]/85 p-1.5 shadow-[0_10px_40px_rgb(0_0_0/0.6)] backdrop-blur-xl">
         {ITEMS.map((it) => {
           const active = isActive(it.href);
