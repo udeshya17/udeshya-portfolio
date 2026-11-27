@@ -8,6 +8,8 @@ import * as THREE from "three";
 import { LOADER_DONE_EVENT, scrollState } from "../scroll/scrollState";
 import { UNIVERSES } from "../universes";
 import { SetPieces, StudioEnvironment } from "./SetPieces";
+import Horizon from "./Horizon";
+import ProjectGallery from "./ProjectGallery";
 import { buildShape, randoms, scatter } from "./shapes";
 
 /* --------------------------------- shaders -------------------------------- */
@@ -33,6 +35,7 @@ attribute float aRand;
 
 varying vec3 vColor;
 varying float vAlpha;
+varying float vBlur;
 
 void main() {
   // staggered, eased morph between the two neighbouring universes
@@ -75,21 +78,28 @@ void main() {
   mv.xy += normalize(d + 1e-5) * force * 0.6;
 
   gl_Position = projectionMatrix * mv;
-  gl_PointSize = uSize * (0.45 + aRand * 0.95) * (1.0 + force * 0.9) * uPixelRatio / -mv.z;
+  // cinematic depth of field: crisp at the focal plane, soft bokeh in front and behind
+  float blur = clamp(abs(-mv.z - 9.0) / 4.5, 0.0, 1.0);
+  vBlur = blur;
+  gl_PointSize = uSize * (0.38 + aRand * 0.8) * (1.0 + blur * 2.2) * (1.0 + force * 0.9) * uPixelRatio / -mv.z;
 
   float h = clamp(0.5 + p.y * 0.2 + (aRand - 0.5) * 0.65, 0.0, 1.0);
   vColor = mix(mix(uColorA, uColorB, h), uColorC, core) + force * 0.35;
-  vAlpha = uOpacity * (0.5 + aRand * 0.5) * (0.35 + 0.65 * it);
+  vAlpha = uOpacity * (0.5 + aRand * 0.5) * (0.35 + 0.65 * it) / (1.0 + blur * 3.0);
 }
 `;
 
 const particleFragment = /* glsl */ `
 varying vec3 vColor;
 varying float vAlpha;
+varying float vBlur;
 void main() {
   float d = length(gl_PointCoord - 0.5);
-  float a = pow(smoothstep(0.5, 0.0, d), 1.7);
-  gl_FragColor = vec4(vColor * (0.55 + a * 0.9), a * vAlpha);
+  // in focus: a bright pin-point with a soft halo; out of focus: an even bokeh disc
+  float sharp = pow(smoothstep(0.5, 0.0, d), 2.4) + smoothstep(0.12, 0.0, d) * 0.8;
+  float bokeh = smoothstep(0.5, 0.42, d) * 0.55 + smoothstep(0.5, 0.46, d) * 0.25;
+  float a = mix(sharp, bokeh, vBlur);
+  gl_FragColor = vec4(vColor * (0.6 + a * 0.8), a * vAlpha);
   #include <colorspace_fragment>
 }
 `;
@@ -136,7 +146,6 @@ const damp = (current: number, target: number, lambda: number, dt: number) =>
 function MorphParticles({ shapes, count, lite }: { shapes: Float32Array[]; count: number; lite: boolean }) {
   const outer = useRef<THREE.Group>(null);
   const inner = useRef<THREE.Group>(null);
-  const rings = useRef<THREE.Group>(null);
   const points = useRef<THREE.Points>(null);
   const state = useRef({ morph: 0, from: -1, to: -1, intro: 0, introTarget: 0 });
 
@@ -267,43 +276,13 @@ function MorphParticles({ shapes, count, lite }: { shapes: Float32Array[]; count
         inner.current.rotation.y = damp(wrapped, 0, 2, dt);
       }
     }
-
-    if (rings.current) {
-      const vis = Math.max(0, 1 - s.morph * 1.6) * s.intro;
-      rings.current.visible = vis > 0.01;
-      rings.current.children.forEach((child, i) => {
-        const mat = (child as THREE.LineLoop).material as THREE.LineBasicMaterial;
-        mat.opacity = vis * 0.35;
-        child.rotation.z += dt * (0.05 + i * 0.03) * (i % 2 ? -1 : 1);
-      });
-    }
   });
-
-  const ringGeoms = useMemo(
-    () =>
-      [3.9, 4.6, 5.4].map((r) => {
-        const pts: THREE.Vector3[] = [];
-        for (let i = 0; i <= 160; i++) {
-          const a = (i / 160) * Math.PI * 2;
-          pts.push(new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r * 0.97, 0));
-        }
-        return new THREE.BufferGeometry().setFromPoints(pts);
-      }),
-    [],
-  );
 
   return (
     <group ref={outer}>
       <group ref={inner}>
         <points ref={points} geometry={geometry} material={material} frustumCulled={false} />
         <SetPieces lite={lite} />
-      </group>
-      <group ref={rings} rotation={[Math.PI / 2, 0, 0]}>
-        {ringGeoms.map((g, i) => (
-          <lineLoop key={i} geometry={g} rotation={[0, i * 0.2, i * 0.7]}>
-            <lineBasicMaterial color={i === 1 ? "#d4ff3f" : "#8b6cff"} transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} />
-          </lineLoop>
-        ))}
       </group>
     </group>
   );
@@ -364,7 +343,7 @@ function Stars({ count }: { count: number }) {
     cam.updateProjectionMatrix();
   });
 
-  return <points ref={ref} geometry={geometry} material={material} frustumCulled={false} />;
+  return <points ref={ref} geometry={geometry} material={material} frustumCulled={false} renderOrder={-2} />;
 }
 
 /* ---------------------------------- root ---------------------------------- */
@@ -445,6 +424,8 @@ export default function Scene() {
         {data && (
           <>
             <StudioEnvironment />
+            <Horizon />
+            <ProjectGallery />
             <MorphParticles shapes={data.shapes} count={data.count} lite={data.lite} />
             <Effects lite={data.lite} />
           </>

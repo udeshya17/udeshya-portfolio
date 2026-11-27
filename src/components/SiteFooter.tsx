@@ -30,7 +30,7 @@ export default function SiteFooter({ profile }: { profile: Profile }) {
       <div className="flex items-center justify-between gap-4 md:justify-end">
         <span className="font-mono text-[11px]">Next.js · Three.js · GSAP</span>
         <button onClick={toTop} className="glass rounded-full px-4 py-2 text-bone hover:text-accent" data-cursor="Up">
-          Back to the singularity ↑
+          Back to top ↑
         </button>
       </div>
     </footer>

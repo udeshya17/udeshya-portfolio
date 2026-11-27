@@ -9,6 +9,7 @@ export const defaultContent: SiteContent = {
     name: "Udeshya Sharma",
     firstName: "Udeshya",
     title: "Senior Full-Stack Developer",
+    headline: "I turn ambitious ideas into *production-grade* software.",
     roles: [
       "Full-Stack Engineer",
       "Blockchain Builder",
@@ -17,7 +18,7 @@ export const defaultContent: SiteContent = {
       "Cloud Tinkerer",
     ],
     tagline:
-      "I design and ship products across fintech, healthcare, legal, and education, from schema to scale.",
+      "Senior full-stack engineer for fintech, AI and Web3 teams. From multi-chain crypto wallets to autonomous AI agents to India's first Shopify Hydrogen store, I own products from schema to scale.",
     summary:
       "Senior Full-Stack Developer with 3 years of experience delivering 15+ launches across fintech, healthcare, legal and education domains. Command of system design, TypeScript, Python and cloud infrastructure. Fluent in prompt engineering with Claude.",
     manifesto:
@@ -584,9 +585,9 @@ export const defaultContent: SiteContent = {
     updatedAt: "2026-11-18T00:00:00.000Z",
   },
   seo: {
-    title: "Udeshya Sharma — Senior Full-Stack Developer",
+    title: "Udeshya Sharma — Senior Full-Stack Engineer for Fintech, AI & Web3",
     description:
-      "Full-stack, blockchain and AI engineer. 15+ launches across fintech, healthcare, legal and education. Explore the multiverse.",
-    siteUrl: "https://udeshya.dev",
+      "I turn ambitious ideas into production-grade software. 15+ launches: multi-chain crypto wallets (ETH, USDT, TRX, BTC), autonomous AI agents, and India's first Shopify Hydrogen store. Available for new work.",
+    siteUrl: "",
   },
 };

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif, Syne } from "next/font/google";
 import { getContent } from "@/lib/content/get";
+import { siteUrl } from "@/lib/og";
 import "./globals.css";
 
 const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["500", "600", "700", "800"] });
@@ -15,35 +16,38 @@ const instrument = Instrument_Serif({
 
 export async function generateMetadata(): Promise<Metadata> {
   const { seo, profile } = await getContent();
-  let metadataBase: URL | undefined;
-  try {
-    metadataBase = new URL(process.env.NEXT_PUBLIC_SITE_URL || seo.siteUrl);
-  } catch {
-    metadataBase = undefined;
-  }
+  const base = siteUrl(seo.siteUrl);
   return {
-    metadataBase,
+    metadataBase: base ? new URL(base) : undefined,
     title: { default: seo.title, template: `%s · ${profile.name}` },
     description: seo.description,
     applicationName: profile.name,
-    authors: [{ name: profile.name }],
+    authors: [{ name: profile.name, url: base }],
+    creator: profile.name,
     keywords: [
       profile.name,
-      "Full-Stack Developer",
-      "Next.js",
-      "React",
-      "Blockchain",
-      "AI Agents",
+      "Senior Full-Stack Developer",
+      "Full-Stack Engineer India",
+      "Next.js developer",
+      "React developer",
+      "Blockchain developer",
+      "Crypto wallet developer",
+      "AI agents developer",
       "TypeScript",
-      "Portfolio",
+      "Hire full-stack developer",
     ],
+    alternates: { canonical: "/" },
     openGraph: {
       type: "website",
+      url: "/",
+      siteName: `${profile.name} — Portfolio`,
       title: seo.title,
       description: seo.description,
-      siteName: profile.name,
+      locale: "en_IN",
     },
     twitter: { card: "summary_large_image", title: seo.title, description: seo.description },
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large" } },
+    category: "technology",
   };
 }
 

@@ -37,7 +37,7 @@ export default function Skills({ skills }: { skills: SkillGroup[] }) {
   }, [skills]);
 
   return (
-    <section id="skills" data-universe className="relative isolate z-10 min-h-screen px-5 py-32 md:px-10 md:py-44">
+    <section id="skills" data-universe className="veil relative isolate z-10 min-h-screen px-5 py-32 md:px-10 md:py-44">
       <Numeral n={4} side="left" />
       <div ref={root} className="ml-auto max-w-4xl md:w-[58%]">
         <UniverseTag index={4} name="Constellation" className="mb-8" />
@@ -60,7 +60,7 @@ export default function Skills({ skills }: { skills: SkillGroup[] }) {
                 {g.items.map((s) => (
                   <span
                     key={s}
-                    className="chip glass cursor-default rounded-full px-4 py-2 text-[15px] font-medium transition-[background-color,color,border-color,box-shadow] duration-300 hover:border-accent hover:bg-accent hover:text-black hover:shadow-[0_0_30px_rgb(212_255_63/0.45)]"
+                    className="chip cursor-default rounded-full border border-white/10 bg-[#0c0d16]/90 px-4 py-2 text-[15px] font-medium text-bone backdrop-blur-md transition-[background-color,color,border-color,box-shadow] duration-300 hover:border-accent hover:bg-accent hover:text-black hover:shadow-[0_0_30px_rgb(212_255_63/0.45)]"
                   >
                     {s}
                   </span>

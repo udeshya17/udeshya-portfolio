@@ -79,10 +79,10 @@ export default function About({ profile, stats, education }: { profile: Profile;
         </div>
       </section>
 
-      <div className="relative z-10 border-y border-line bg-void/60 py-6 backdrop-blur-sm md:py-8">
+      <div className="relative z-10 border-y border-line bg-void/70 py-4 backdrop-blur-sm md:py-5">
         <VelocityMarquee
           items={["Full-Stack", "Blockchain", "AI Agents", "System Design", "Cloud", "Prompt Engineering", "Next.js", "Python"]}
-          className="font-display text-6xl font-extrabold tracking-tight uppercase md:text-[9rem] md:leading-none"
+          className="font-display text-3xl font-extrabold tracking-tight uppercase md:text-6xl md:leading-none"
         />
       </div>
     </>

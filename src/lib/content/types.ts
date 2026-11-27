@@ -4,6 +4,7 @@ export type Profile = {
   name: string;
   firstName: string;
   title: string;
+  headline: string; // hero statement; wrap one word in *asterisks* to accent it
   roles: string[]; // cycled in the hero
   tagline: string;
   summary: string;

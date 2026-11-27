@@ -53,8 +53,8 @@ export function GenerativeCover({ p, index = 0, className = "" }: { p: Project; 
  */
 export const BrowserFrame = forwardRef<
   HTMLDivElement,
-  { p: Project; index?: number; hover?: boolean; className?: string; chrome?: boolean }
->(function BrowserFrame({ p, index = 0, hover = false, className = "", chrome = true }, ref) {
+  { p: Project; index?: number; hover?: boolean; auto?: boolean; className?: string; chrome?: boolean }
+>(function BrowserFrame({ p, index = 0, hover = false, auto = false, className = "", chrome = true }, ref) {
   const src = previewSrc(p);
   const [failed, setFailed] = useState(!src);
   const showShot = src && !failed;
@@ -78,7 +78,7 @@ export const BrowserFrame = forwardRef<
           {showShot && <span className="hidden font-mono text-[10px] tracking-[0.2em] text-accent uppercase sm:inline">Live</span>}
         </div>
       )}
-      <div className={`browser-viewport relative min-h-0 flex-1 overflow-hidden ${hover ? "browser-hover" : ""}`}>
+      <div className={`browser-viewport relative min-h-0 flex-1 overflow-hidden ${hover ? "browser-hover" : ""} ${auto ? "browser-auto" : ""}`}>
         {showShot ? (
           <>
             {/* sits underneath; the screenshot covers it as soon as it paints */}

@@ -46,7 +46,7 @@ async function capture(url: string): Promise<Buffer | null> {
   const img = sharp(raw, { limitInputPixels: false });
   const { width = 1280, height = 800 } = await img.metadata();
   return img
-    .extract({ left: 0, top: 0, width, height: Math.min(height, 4200) })
+    .extract({ left: 0, top: 0, width, height: Math.min(height, 3200) })
     .resize({ width: 1200 })
     .webp({ quality: 72 })
     .toBuffer();

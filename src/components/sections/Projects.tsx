@@ -2,157 +2,220 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/lib/content/types";
-import { BrowserFrame } from "../ui/ProjectVisual";
-import { UniverseTag } from "../ui/primitives";
+import { scrollState, setGalleryItems } from "../scroll/scrollState";
+import { previewSrc } from "../ui/ProjectVisual";
+import { FadeIn, UniverseTag } from "../ui/primitives";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 export default function Projects({ projects }: { projects: Project[] }) {
   const section = useRef<HTMLElement>(null);
-  const track = useRef<HTMLDivElement>(null);
+  const trigger = useRef<ScrollTrigger | null>(null);
   const bar = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+
   const featured = projects.filter((p) => p.featured);
-  const shown = (featured.length >= 3 ? featured : projects).slice(0, 7);
+  const shown = (featured.length >= 3 ? featured : projects).slice(0, 8);
   const rest = projects.filter((p) => !shown.includes(p));
+  const p = shown[active] ?? shown[0];
+
+  // publish the ring's contents to the 3D scene
+  useEffect(() => {
+    setGalleryItems(
+      shown.map((x) => ({
+      slug: x.slug,
+      name: x.name,
+      category: x.category.split("·")[0].trim(),
+      accent: x.accent || "#b69cff",
+        src: previewSrc(x) ?? (x.image || null),
+      })),
+    );
+    return () => setGalleryItems([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects]);
 
   useEffect(() => {
     const el = section.current;
-    const tr = track.current;
-    if (!el || !tr) return;
+    if (!el || shown.length < 1) return;
+    const n = shown.length;
     const ctx = gsap.context(() => {
-      const distance = () => Math.max(0, tr.scrollWidth - window.innerWidth);
-      const tween = gsap.to(tr, {
-        x: () => -distance(),
-        ease: "none",
-        scrollTrigger: {
-          trigger: el,
-          start: "top top",
-          end: () => `+=${distance()}`,
-          pin: true,
-          scrub: 1,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => bar.current && (bar.current.style.transform = `scaleX(${self.progress})`),
+      trigger.current = ScrollTrigger.create({
+        trigger: el,
+        start: "top top",
+        end: () => `+=${Math.max(1, n - 1) * window.innerHeight * 0.85}`,
+        pin: true,
+        invalidateOnRefresh: true,
+        onLeave: () => (scrollState.gallery.present = false),
+        onEnterBack: () => (scrollState.gallery.present = true),
+        onUpdate: (self) => {
+          scrollState.gallery.progress = self.progress;
+          const i = Math.round(self.progress * (n - 1));
+          if (i !== scrollState.gallery.active) {
+            scrollState.gallery.active = i;
+            setActive(i);
+          }
+          if (bar.current) bar.current.style.transform = `scaleX(${self.progress})`;
         },
       });
-      gsap.utils.toArray<HTMLElement>(".proj-card").forEach((card) => {
-        gsap.fromTo(
-          card,
-          { rotateY: -18, scale: 0.88, opacity: 0.3 },
-          {
-            rotateY: 0,
-            scale: 1,
-            opacity: 1,
-            ease: "none",
-            scrollTrigger: { trigger: card, containerAnimation: tween, start: "left right", end: "left 55%", scrub: true },
-          },
-        );
-        // the website inside the browser frame scrolls as the card travels across the screen
-        const frame = card.querySelector<HTMLElement>(".proj-frame");
-        if (frame) {
-          ScrollTrigger.create({
-            trigger: card,
-            containerAnimation: tween,
-            start: "left 85%",
-            end: "right 15%",
-            onUpdate: (self) => frame.style.setProperty("--p", self.progress.toFixed(4)),
-          });
-        }
-      });
     }, el);
-    return () => ctx.revert();
-  }, [projects]);
+    return () => {
+      trigger.current = null;
+      ctx.revert();
+    };
+  }, [shown.length]);
+
+  const goTo = (i: number) => {
+    const t = trigger.current;
+    if (!t) return;
+    const y = t.start + ((t.end - t.start) * i) / Math.max(1, shown.length - 1);
+    if (scrollState.lenis) scrollState.lenis.scrollTo(y, { duration: 1.4 });
+    else window.scrollTo({ top: y, behavior: "smooth" });
+  };
+
+  if (!p) return null;
 
   return (
-    <section ref={section} id="projects" data-universe className="relative z-10 h-[100svh] overflow-hidden">
-      <div ref={track} className="flex h-full w-max items-center gap-5 pr-[8vw] pl-5 [perspective:1400px] md:gap-8 md:pl-10">
-        <div className="flex w-[85vw] shrink-0 flex-col justify-center md:w-[38vw] md:pr-10">
-          <UniverseTag index={6} name="the Wormhole" className="mb-8" />
-          <h2 className="font-display text-[8.2vw] leading-[0.92] font-extrabold tracking-tight sm:text-5xl md:text-8xl">
-            Selected <span className="font-serif font-normal text-accent italic">work</span>
-            <br />
-            from the other side.
-          </h2>
-          <p className="mt-6 max-w-sm text-lg text-fog">Keep scrolling: the gallery moves sideways and live websites scroll inside each frame. Open any project for the full case study.</p>
-          <p className="mt-10 flex items-center gap-3 font-mono text-[11px] tracking-[0.25em] text-fog uppercase">
-            <span className="inline-block h-px w-14 bg-accent" /> {String(shown.length).padStart(2, "0")} featured · scroll →
-          </p>
-        </div>
+    <>
+      <section ref={section} id="projects" data-universe className="relative z-10 h-[100svh] overflow-hidden">
+        {/* readable side: a soft dark gradient behind the text column */}
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-full bg-gradient-to-r from-void/85 via-void/40 to-transparent md:w-[60%]" />
 
-        {shown.map((p, i) => (
-          <article
-            key={p.slug}
-            className="proj-card flex h-[74svh] w-[86vw] shrink-0 flex-col overflow-hidden rounded-[2rem] border border-line bg-[#0d0a12]/90 p-3 backdrop-blur-xl md:h-[78vh] md:w-[min(60vw,1000px)]"
-          >
-            <Link href={`/projects/${p.slug}`} className="relative block min-h-0 flex-[1.35]" data-cursor="Open">
-              <BrowserFrame p={p} index={i} className="proj-frame" />
-              {p.featured && (
-                <span className="absolute top-14 right-4 rounded-full bg-black/60 px-3 py-1 font-mono text-[10px] tracking-[0.2em] text-accent uppercase backdrop-blur">
-                  Featured
-                </span>
-              )}
-            </Link>
-            <div className="flex flex-1 flex-col justify-between gap-3 px-3 pt-5 pb-2 md:px-5">
-              <div>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="font-mono text-[10px] tracking-[0.25em] text-fog uppercase">{p.category}</p>
-                    <h3 className="mt-1 truncate font-display text-2xl font-bold tracking-tight md:text-4xl">{p.name}</h3>
-                    <p className="mt-0.5 font-serif text-lg text-bone/80 italic">{p.tagline}</p>
-                  </div>
-                  <span className="font-mono text-sm text-fog">{p.year}</span>
+        <div className="relative mx-auto flex h-full max-w-[1500px] flex-col justify-end px-5 pb-28 md:justify-center md:px-10 md:pb-0">
+          <div className="md:w-[40%]">
+            <UniverseTag index={6} name="Work" className="mb-6 hidden md:flex" />
+
+            {/* project ticks */}
+            <div className="mb-5 flex items-center gap-2 md:mb-8" role="tablist" aria-label="Featured projects">
+              {shown.map((x, i) => (
+                <button
+                  key={x.slug}
+                  role="tab"
+                  aria-selected={i === active}
+                  aria-label={x.name}
+                  onClick={() => goTo(i)}
+                  className="group py-2"
+                >
+                  <span
+                    className={`block h-[3px] rounded-full transition-all duration-500 ${i === active ? "w-10 bg-accent" : "w-4 bg-white/20 group-hover:bg-white/50"}`}
+                  />
+                </button>
+              ))}
+              <span className="ml-3 font-mono text-xs text-fog tabular-nums">
+                {String(active + 1).padStart(2, "0")} / {String(shown.length).padStart(2, "0")}
+              </span>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div key={p.slug} initial="in" animate="show" exit="out" className="space-y-5">
+                <motion.p
+                  variants={{ in: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 }, out: { opacity: 0, y: -10 } }}
+                  transition={{ duration: 0.5, ease: EASE }}
+                  className="flex items-center gap-3 text-sm text-fog"
+                >
+                  <span className="h-2 w-2 rounded-full" style={{ background: p.accent, boxShadow: `0 0 12px ${p.accent}` }} />
+                  {p.category} · {p.year}
+                </motion.p>
+                <div className="overflow-hidden">
+                  <motion.h3
+                    variants={{ in: { y: "105%" }, show: { y: "0%" }, out: { y: "-105%" } }}
+                    transition={{ duration: 0.7, ease: EASE }}
+                    className="font-display text-[clamp(2.4rem,4.6vw,4.5rem)] leading-[0.98] font-bold tracking-[-0.035em]"
+                  >
+                    {p.name}
+                  </motion.h3>
                 </div>
-                <p className="mt-3 line-clamp-2 max-w-2xl text-[14px] leading-relaxed text-fog">{p.description}</p>
-              </div>
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div className="flex flex-wrap gap-1.5">
-                  {p.stack.slice(0, 5).map((s) => (
-                    <span key={s} className="rounded-full border border-line px-2.5 py-1 font-mono text-[10.5px] text-bone/70">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex gap-2">
+                <motion.p
+                  variants={{ in: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 }, out: { opacity: 0, y: -10 } }}
+                  transition={{ duration: 0.6, delay: 0.08, ease: EASE }}
+                  className="font-serif text-xl text-accent italic md:text-2xl"
+                >
+                  {p.tagline}
+                </motion.p>
+                <motion.p
+                  variants={{ in: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 }, out: { opacity: 0, y: -10 } }}
+                  transition={{ duration: 0.6, delay: 0.14, ease: EASE }}
+                  className="hidden max-w-md text-[16px] leading-relaxed text-bone/80 md:block"
+                >
+                  {p.description}
+                </motion.p>
+                <motion.p
+                  variants={{ in: { opacity: 0 }, show: { opacity: 1 }, out: { opacity: 0 } }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="hidden max-w-md font-mono text-[11.5px] leading-relaxed text-fog md:block"
+                >
+                  {p.stack.slice(0, 6).join("  ·  ")}
+                </motion.p>
+                <motion.div
+                  variants={{ in: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 }, out: { opacity: 0 } }}
+                  transition={{ duration: 0.6, delay: 0.24, ease: EASE }}
+                  className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-2"
+                >
+                  <Link href={`/projects/${p.slug}`} className="group inline-flex items-center gap-3 rounded-full bg-bone py-2 pr-2 pl-6 text-[15px] font-semibold text-black">
+                    Read case study
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-bone transition-transform duration-500 group-hover:-rotate-45">→</span>
+                  </Link>
                   {p.url && (
-                    <a href={p.url} target="_blank" rel="noreferrer" className="rounded-full border border-line px-4 py-2 text-sm hover:border-bone">
-                      Live ↗
+                    <a href={p.url} target="_blank" rel="noreferrer" className="text-[15px] font-medium text-bone underline decoration-white/25 underline-offset-[6px] hover:decoration-bone">
+                      Visit live site ↗
                     </a>
                   )}
-                  <Link href={`/projects/${p.slug}`} className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-black hover:bg-bone">
-                    Case study →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </article>
-        ))}
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
 
-        {rest.length > 0 && (
-          <div className="flex h-[74svh] w-[86vw] shrink-0 flex-col rounded-[2rem] border border-line bg-[#0d0a12]/90 p-7 backdrop-blur-xl md:h-[78vh] md:w-[min(46vw,760px)] md:p-10">
-            <p className="font-mono text-[11px] tracking-[0.28em] text-fog uppercase">More work · {rest.length}</p>
-            <ul className="mt-6 min-h-0 flex-1 overflow-y-auto pr-2 no-scrollbar" data-lenis-prevent>
-              {rest.map((p) => (
-                <li key={p.slug} className="border-b border-line">
-                  <Link href={`/projects/${p.slug}`} className="group flex items-baseline justify-between gap-4 py-4" data-cursor="Open">
-                    <span className="min-w-0">
-                      <span className="block truncate font-display text-xl font-bold transition-[color,translate] duration-500 group-hover:translate-x-2 group-hover:text-accent md:text-2xl">
-                        {p.name}
-                      </span>
-                      <span className="block truncate text-sm text-fog">{p.category}</span>
-                    </span>
-                    <span className="shrink-0 font-mono text-xs text-fog transition-colors group-hover:text-accent">{p.year} →</span>
+        {/* the front 3D screen is clickable */}
+        <Link
+          href={`/projects/${p.slug}`}
+          aria-label={`Open ${p.name} case study`}
+          className="absolute top-[9%] left-[5%] h-[26%] w-[90%] md:top-[27%] md:left-[48%] md:h-[47%] md:w-[47%]"
+          data-cursor="Open"
+        />
+
+        <p className="pointer-events-none absolute right-5 bottom-8 hidden font-mono text-[11px] tracking-[0.25em] text-fog uppercase md:right-10 md:block">
+          Scroll to rotate
+        </p>
+        <div className="absolute inset-x-5 bottom-6 h-px bg-line md:inset-x-10">
+          <div ref={bar} className="h-full origin-left scale-x-0 bg-accent" />
+        </div>
+      </section>
+
+      {rest.length > 0 && (
+        <section className="relative isolate z-10 px-5 pt-24 pb-10 md:px-10">
+          <div className="mx-auto max-w-[1500px]">
+            <FadeIn className="mb-8 flex items-end justify-between gap-4">
+              <h3 className="font-display text-3xl font-bold tracking-tight md:text-5xl">
+                More <span className="font-serif font-normal text-accent italic">work</span>
+              </h3>
+              <span className="text-sm text-fog">{rest.length} more case studies</span>
+            </FadeIn>
+            <ul className="border-t border-line">
+              {rest.map((x) => (
+                <li key={x.slug} className="border-b border-line">
+                  <Link href={`/projects/${x.slug}`} className="group relative grid grid-cols-[1fr_auto] items-baseline gap-4 py-6 md:grid-cols-[1.2fr_1fr_6rem_auto]" data-cursor="Open">
+                    <span
+                      aria-hidden
+                      className="absolute inset-0 origin-left scale-x-0 transition-transform duration-700 ease-out-expo group-hover:scale-x-100"
+                      style={{ background: `linear-gradient(90deg, ${x.accent}1f, transparent 70%)` }}
+                    />
+                    <span className="relative font-display text-2xl font-bold tracking-tight transition-transform duration-500 group-hover:translate-x-2 md:text-3xl">{x.name}</span>
+                    <span className="relative hidden text-fog md:block">{x.tagline}</span>
+                    <span className="relative hidden text-sm text-fog md:block">{x.year}</span>
+                    <span className="relative text-xl text-fog transition-all duration-500 group-hover:-rotate-45 group-hover:text-accent">→</span>
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
-        )}
-      </div>
-      <div className="absolute inset-x-5 bottom-6 h-px bg-line md:inset-x-10">
-        <div ref={bar} className="h-full origin-left scale-x-0 bg-accent" />
-      </div>
-    </section>
+        </section>
+      )}
+    </>
   );
 }

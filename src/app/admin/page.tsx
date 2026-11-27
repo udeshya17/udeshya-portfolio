@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { adminConfigured, isAdmin } from "@/lib/auth";
 import { getContentFresh } from "@/lib/content/get";
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 async function Gate() {
+  await connection(); // auth checks read the clock; always render at request time
   if (!adminConfigured()) {
     return (
       <Shell>

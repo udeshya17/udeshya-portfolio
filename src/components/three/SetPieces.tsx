@@ -26,8 +26,6 @@ float fbm(vec2 p){
 }
 `;
 
-/* ------------------------------- black hole ------------------------------- */
-
 const diskVertex = /* glsl */ `
 varying vec2 vPos;
 varying vec3 vWorld;
@@ -37,101 +35,6 @@ void main(){
   vWorld = w.xyz;
   gl_Position = projectionMatrix * viewMatrix * w;
 }`;
-
-const diskFragment = /* glsl */ `
-uniform float uTime;
-uniform float uVis;
-uniform float uInner;
-uniform float uOuter;
-varying vec2 vPos;
-${noise}
-void main(){
-  float r = length(vPos);
-  float t = clamp((r - uInner) / (uOuter - uInner), 0.0, 1.0);
-  float ang = atan(vPos.y, vPos.x);
-  // Keplerian shear: inner gas orbits faster
-  float swirl = ang * 3.0 + uTime * 1.4 / (0.35 + t * 2.0);
-  float gas = fbm(vec2(swirl, t * 9.0 - uTime * 0.25));
-  float streaks = fbm(vec2(ang * 12.0 + uTime * 0.9 / (0.3 + t), t * 30.0));
-  // relativistic beaming: one side brighter
-  float doppler = 1.0 + 0.75 * sin(ang + 0.6);
-  vec3 hot = vec3(1.0, 0.96, 0.88);
-  vec3 warm = vec3(1.0, 0.55, 0.18);
-  vec3 cool = vec3(0.55, 0.12, 0.05);
-  vec3 col = mix(hot, warm, smoothstep(0.0, 0.35, t));
-  col = mix(col, cool, smoothstep(0.35, 1.0, t));
-  float intensity = (0.35 + gas * 1.1 + streaks * 0.35) * doppler * (1.25 - t);
-  float alpha = smoothstep(0.0, 0.06, t) * (1.0 - smoothstep(0.6, 1.0, t)) * uVis;
-  gl_FragColor = vec4(col * intensity * 1.6, alpha * clamp(intensity, 0.0, 1.0));
-  #include <colorspace_fragment>
-}`;
-
-function BlackHole({ vis }: { vis: () => number }) {
-  const disk = useRef<THREE.ShaderMaterial>(null);
-  const halo = useRef<THREE.ShaderMaterial>(null);
-  const group = useRef<THREE.Group>(null);
-  const lens = useRef<THREE.Group>(null);
-  const horizon = useRef<THREE.MeshBasicMaterial>(null);
-  const glow = useRef<THREE.MeshBasicMaterial>(null);
-
-  const diskMat = useMemo(
-    () => ({
-      uniforms: { uTime: { value: 0 }, uVis: { value: 0 }, uInner: { value: 0.52 }, uOuter: { value: 2.1 } },
-      vertexShader: diskVertex,
-      fragmentShader: diskFragment,
-    }),
-    [],
-  );
-  const haloMat = useMemo(
-    () => ({
-      uniforms: { uTime: { value: 0 }, uVis: { value: 0 }, uInner: { value: 0.5 }, uOuter: { value: 0.95 } },
-      vertexShader: diskVertex,
-      fragmentShader: diskFragment,
-    }),
-    [],
-  );
-
-  useFrame(({ camera }, dt) => {
-    const v = vis();
-    if (group.current) group.current.visible = v > 0.01;
-    if (v <= 0.01) return;
-    for (const m of [disk.current, halo.current]) {
-      if (!m) continue;
-      m.uniforms.uTime.value += Math.min(dt, 0.05);
-      m.uniforms.uVis.value = v;
-    }
-    if (halo.current) halo.current.uniforms.uVis.value = v * 0.75;
-    if (horizon.current) horizon.current.opacity = v;
-    if (glow.current) glow.current.opacity = v * 0.35;
-    // lensed image of the far side of the disk always faces the viewer
-    if (lens.current && group.current) {
-      lens.current.quaternion.copy(group.current.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(camera.quaternion));
-    }
-  });
-
-  return (
-    <group ref={group}>
-      <mesh renderOrder={2}>
-        <sphereGeometry args={[0.46, 48, 48]} />
-        <meshBasicMaterial ref={horizon} color="#000000" transparent />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} renderOrder={3}>
-        <ringGeometry args={[0.52, 2.1, 160, 1]} />
-        <shaderMaterial ref={disk} args={[diskMat]} transparent depthWrite={false} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
-      </mesh>
-      <group ref={lens}>
-        <mesh renderOrder={1}>
-          <ringGeometry args={[0.5, 0.95, 128, 1]} />
-          <shaderMaterial ref={halo} args={[haloMat]} transparent depthWrite={false} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
-        </mesh>
-        <mesh renderOrder={0}>
-          <circleGeometry args={[1.25, 64]} />
-          <meshBasicMaterial ref={glow} color="#ff7a3d" transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} alphaMap={RADIAL} />
-        </mesh>
-      </group>
-    </group>
-  );
-}
 
 /* --------------------------------- planet --------------------------------- */
 
@@ -418,19 +321,6 @@ function Fireflies({ vis }: { vis: () => number }) {
 
 /* --------------------------------- shared --------------------------------- */
 
-const RADIAL = (() => {
-  if (typeof document === "undefined") return null;
-  const c = document.createElement("canvas");
-  c.width = c.height = 128;
-  const ctx = c.getContext("2d")!;
-  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-  g.addColorStop(0, "#fff");
-  g.addColorStop(0.35, "#888");
-  g.addColorStop(1, "#000");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 128, 128);
-  return new THREE.CanvasTexture(c);
-})();
 
 /** Studio lighting baked into an environment map; no HDR download needed. */
 export function StudioEnvironment() {
@@ -453,7 +343,6 @@ export function SetPieces({ lite }: { lite: boolean }) {
   };
   return (
     <>
-      <BlackHole vis={vis(0)} />
       <Planet vis={vis(1)} />
       <Bubbles vis={vis(2)} lite={lite} />
       <Crystal vis={vis(3)} lite={lite} />

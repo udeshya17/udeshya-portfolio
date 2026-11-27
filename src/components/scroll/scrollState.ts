@@ -20,6 +20,26 @@ export const scrollState = {
   lock: null as number | null, // pages other than home pin the scene to one universe
   pointer: { x: 9, y: 9 }, // NDC -1..1 (9 = off-screen until the mouse moves)
   lenis: null as Lenis | null,
+  // the 3D project ring reads this; the Projects section writes it
+  gallery: {
+    items: [] as GalleryItem[],
+    progress: 0, // 0..1 through the pinned section
+    active: 0,
+    present: true, // false once you've scrolled past the pinned gallery
+  },
+};
+
+export function setGalleryItems(items: GalleryItem[]) {
+  scrollState.gallery.items = items;
+  if (!items.length) scrollState.gallery.progress = 0;
+}
+
+export type GalleryItem = {
+  slug: string;
+  name: string;
+  category: string;
+  accent: string;
+  src: string | null; // live-site screenshot (tall) or null for a designed poster
 };
 
 type Listener = () => void;
@@ -68,7 +88,10 @@ export function setLock(i: number | null) {
 export function scrollToId(id: string) {
   const el = document.getElementById(id);
   if (!el) return;
-  if (scrollState.lenis) scrollState.lenis.scrollTo(el, { duration: 2.2 });
+  if (scrollState.lenis) {
+    scrollState.lenis.resize();
+    scrollState.lenis.scrollTo(el, { duration: 2.2, force: true });
+  }
   else el.scrollIntoView({ behavior: "smooth" });
 }
 

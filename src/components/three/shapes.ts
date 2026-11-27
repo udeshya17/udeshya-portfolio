@@ -54,19 +54,7 @@ function galaxy(n: number) {
   const rand = mulberry32(1);
   const arms = 4;
   return fill(n, (i) => {
-    if (i % 9 === 0) {
-      // accretion disk hugging the event horizon
-      const a = rand() * Math.PI * 2;
-      const r = 0.62 + Math.pow(rand(), 2) * 0.55;
-      return [Math.cos(a) * r, gauss(rand) * 0.02, Math.sin(a) * r];
-    }
-    if (i % 13 === 0) {
-      // photon ring: light bent around the singularity
-      const a = rand() * Math.PI * 2;
-      const r = 0.56 + gauss(rand) * 0.015;
-      return [Math.cos(a) * r, Math.sin(a) * r, gauss(rand) * 0.02];
-    }
-    const r = Math.pow(rand(), 1.35) * 3.2 + 0.75;
+    const r = Math.pow(rand(), 1.2) * 2.9 + 1.5; // dust lanes around the raytraced black hole
     const branch = ((i % arms) / arms) * Math.PI * 2;
     const spin = r * 1.55;
     const spread = 0.38 * Math.pow(r / 3.5, 0.8);

@@ -216,3 +216,16 @@ main :is(.text-gradient, .text-gradient *, .text-outline, button, a.bg-accent, .
   pointer-events: none;
   background: linear-gradient(180deg, transparent 0%, rgb(4 4 10 / 0.72) 14%, rgb(4 4 10 / 0.72) 86%, transparent 100%);
 }
+
+@keyframes scroll-cue {
+  0% { transform: translateY(-100%); }
+  60%, 100% { transform: translateY(200%); }
+}
+
+/* slow, looping tour of a live website inside a browser frame */
+.browser-auto { animation: site-tour 28s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate; }
+.browser-auto:hover { animation-play-state: paused; }
+@keyframes site-tour {
+  0%, 6% { --p: 0; }
+  94%, 100% { --p: 1; }
+}

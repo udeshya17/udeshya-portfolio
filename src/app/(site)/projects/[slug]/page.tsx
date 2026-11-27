@@ -16,7 +16,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { projects } = await getContent();
   const p = projects.find((x) => x.slug === slug);
   if (!p) return { title: "Project not found" };
-  return { title: p.name, description: p.description, openGraph: { title: p.name, description: p.description } };
+  return {
+    title: `${p.name} — Case study`,
+    description: p.description,
+    alternates: { canonical: `/projects/${p.slug}` },
+    openGraph: { type: "article", url: `/projects/${p.slug}`, title: `${p.name} — ${p.tagline}`, description: p.description },
+    twitter: { card: "summary_large_image", title: `${p.name} — ${p.tagline}`, description: p.description },
+  };
 }
 
 async function Project({ slug }: { slug: string }) {

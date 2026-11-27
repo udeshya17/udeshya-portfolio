@@ -1,6 +1,5 @@
 "use client";
 
-import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
@@ -16,27 +15,6 @@ import UniverseSignal from "./UniverseSignal";
 import { UNIVERSES } from "./universes";
 
 const Scene = dynamic(() => import("./three/Scene"), { ssr: false });
-
-/** Sci-fi readout on the right edge: scroll %, velocity, current universe. */
-function Hud() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const tick = () => {
-      if (!ref.current) return;
-      const u = UNIVERSES[scrollState.active] ?? UNIVERSES[0];
-      ref.current.textContent = `SCROLL ${String(Math.round(scrollState.progress * 100)).padStart(3, "0")}%  ·  VEL ${Math.abs(scrollState.velocity).toFixed(1).padStart(4, "0")}  ·  ${u.name.toUpperCase()}`;
-    };
-    gsap.ticker.add(tick);
-    return () => gsap.ticker.remove(tick);
-  }, []);
-  return (
-    <div
-      ref={ref}
-      aria-hidden
-      className="pointer-events-none fixed top-1/2 right-3 z-40 hidden origin-center translate-x-[calc(50%-6px)] -translate-y-1/2 rotate-90 font-mono text-[10px] tracking-[0.2em] whitespace-pre text-fog/60 lg:block"
-    />
-  );
-}
 
 /** Keeps the CSS accent colours in sync with the active universe. */
 function AccentSync() {
@@ -66,12 +44,23 @@ function RouteSync() {
     }
     scrollState.lenis?.scrollTo(0, { immediate: true, force: true });
     window.scrollTo(0, 0);
-    const id = window.setTimeout(() => {
+    const go = () => {
+      scrollState.lenis?.resize();
       ScrollTrigger.refresh();
       const hash = window.location.hash.slice(1);
       if (hash) scrollToId(hash);
-    }, 350);
-    return () => window.clearTimeout(id);
+    };
+    // the new page (and its pinned sections) needs a moment to lay out
+    const a = window.setTimeout(go, 400);
+    const b = window.setTimeout(() => {
+      const hash = window.location.hash.slice(1);
+      const el = hash && document.getElementById(hash);
+      if (el && Math.abs(el.getBoundingClientRect().top) > 40) go();
+    }, 2900);
+    return () => {
+      window.clearTimeout(a);
+      window.clearTimeout(b);
+    };
   }, [pathname]);
   return null;
 }
@@ -97,7 +86,6 @@ export default function SiteChrome({ profile, children }: { profile: Profile; ch
       <div className="grain" aria-hidden />
       <Navbar profile={profile} />
       <MobileDock />
-      <Hud />
       <UniverseSignal />
       {children}
     </>

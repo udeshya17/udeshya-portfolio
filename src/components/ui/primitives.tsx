@@ -205,7 +205,7 @@ export function VelocityMarquee({ items, className = "", reverse = false }: { it
     const dir = reverse ? 1 : -1;
     const tick = () => {
       const vel = scrollState.velocity;
-      x += dir * (0.6 + Math.min(Math.abs(vel) * 0.25, 12));
+      x += dir * (1.6 + Math.min(Math.abs(vel) * 0.3, 14));
       const half = el.scrollWidth / 2;
       if (half > 0) x = ((x % half) - half) % half;
       skew += (Math.max(-12, Math.min(12, vel * 0.35)) - skew) * 0.1;
